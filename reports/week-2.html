@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2. Hafta - Market Otomasyonu</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="container">
+        <hgroup>
+            <h1>2. Hafta: Paydaş Analizi ve Gereksinim Belirleme</h1>
+            <p>Market Otomasyonu Projesi İlerleme Raporu</p>
+        </hgroup>
+        <nav>
+            <ul>
+                <li><a href="../index.html" class="contrast">Anasayfaya Dön</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <article>
+            <h2>Paydaş Analizi</h2>
+            <p>Sistemin temel paydaşları ve rolleri aşağıdaki gibidir:</p>
+            <ul>
+                <li><strong>Market Sahibi (Birincil Aktör):</strong> Satış işlemleri, stok güncellemeleri ve veresiye takibi işlemlerini yöneten ana kullanıcıdır.</li>
+                <li><strong>Müşteriler:</strong> Satış işleminin doğrudan etkilediği, veresiye borçlarına sahip olabilecek son kullanıcılardır.</li>
+                <li><strong>Geliştirici (Emir BAYRAKTAR):</strong> Sistemin tasarımı, kodlanması ve bakımından sorumludur.</li>
+            </ul>
+            
+            <h3>Fonksiyonel Gereksinimler</h3>
+            <p>Sistemin gerçekleştirmesi gereken temel işlevler:</p>
+            <ul>
+                <li><strong>FR-01:</strong> Barkod okuma sistemi ile hızlı satış yapılabilmelidir.</li>
+                <li><strong>FR-02:</strong> Veresiye borçları müşteri bazlı olarak kaydedilebilmeli ve takip edilebilmelidir.</li>
+                <li><strong>FR-03:</strong> Kritik stok seviyesine düşen ürünler için otomatik görsel uyarı verilmelidir.</li>
+                <li><strong>FR-04:</strong> Günlük kâr-zarar analizi ve satış raporları üretilebilmelidir.</li>
+            </ul>
+
+            <h3>Fonksiyonel Olmayan Gereksinimler</h3>
+            <ul>
+                <li><strong>Performans:</strong> Sayfa geçiş süreleri 1 saniyenin altında olmalıdır.</li>
+                <li><strong>Kullanılabilirlik:</strong> Düşük bilgisayar okuryazarlığına sahip kullanıcılar için karmaşıklıktan uzak bir arayüz.</li>
+                <li><strong>Güvenilirlik:</strong> Veritabanı (MySQL) yedekleme ve veri bütünlüğü.</li>
+            </ul>
+
+            <h3>Temel İş Akışı (Use Case)</h3>
+            <p>
+                <strong>Satış Süreci:</strong> Kasiyer giriş yapar -> Barkod okutulur -> Toplam tutar hesaplanır -> Ödeme tipi seçilir (Nakit/Veresiye) -> Stok güncellenir -> Fiş oluşturulur.
+            </p>
+        </article>
+    </main>
+
+    <footer class="container">
+        <small>&copy; 2026 Emir BAYRAKTAR | Sistem Analizi ve Tasarımı Dersi</small>
+    </footer>
+</body>
+</html>
