@@ -1,60 +1,548 @@
 <!DOCTYPE html>
-<html lang="tr" data-theme="light">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2. Hafta - Market Otomasyonu</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-    <link rel="stylesheet" href="../css/style.css">
+    <title>Hafta 2 — Market Otomasyonu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0c10;
+            --surface: #111318;
+            --border: #1e2430;
+            --accent: #00e5a0;
+            --accent2: #0077ff;
+            --accent3: #ff6b35;
+            --text: #e8eaf0;
+            --muted: #6b7280;
+            --card-bg: #13161e;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,119,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,119,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 1.2rem 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(10,12,16,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent2);
+        }
+
+        .back-link {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--text); }
+        .back-link::before { content: '←'; color: var(--accent); }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 9rem 2rem 5rem;
+        }
+
+        .report-header {
+            margin-bottom: 4rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .report-week-tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.25em;
+            color: var(--accent2);
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .report-week-tag::before { content: '//'; opacity: 0.5; }
+
+        .report-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-meta {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        .meta-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent2);
+            box-shadow: 0 0 8px var(--accent2);
+        }
+
+        .tags-row { display: flex; gap: 0.6rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2px;
+            letter-spacing: 0.05em;
+        }
+        .tag-green { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+        .tag-blue { background: rgba(0,119,255,0.1); color: #4da6ff; border: 1px solid rgba(0,119,255,0.2); }
+        .tag-orange { background: rgba(255,107,53,0.1); color: var(--accent3); border: 1px solid rgba(255,107,53,0.2); }
+
+        .section-block { margin-bottom: 3rem; }
+
+        .block-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .block-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        .block-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .block-text { color: var(--muted); font-size: 0.95rem; line-height: 1.9; }
+        .block-text strong { color: var(--text); font-weight: 500; }
+
+        /* STAKEHOLDER CARDS */
+        .stakeholder-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stakeholder-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.6rem;
+            transition: transform 0.2s, border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .stakeholder-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--accent2);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s;
+        }
+        .stakeholder-card:hover { transform: translateY(-3px); border-color: rgba(0,119,255,0.3); }
+        .stakeholder-card:hover::before { transform: scaleX(1); }
+
+        .sk-icon { font-size: 1.8rem; margin-bottom: 0.8rem; }
+        .sk-role {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--accent2);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.4rem;
+        }
+        .sk-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        .sk-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.7; }
+
+        /* REQUIREMENTS TABLE */
+        .req-list { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1.5rem; }
+
+        .req-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.2rem 1.6rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.2rem;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .req-item:hover { transform: translateX(4px); border-color: rgba(0,229,160,0.3); }
+
+        .req-code {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--accent);
+            background: rgba(0,229,160,0.08);
+            border: 1px solid rgba(0,229,160,0.15);
+            padding: 0.2rem 0.6rem;
+            border-radius: 2px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 0.15rem;
+        }
+
+        .req-text { font-size: 0.88rem; color: var(--muted); }
+        .req-text strong { color: var(--text); font-weight: 500; display: block; margin-bottom: 0.2rem; }
+
+        /* NON-FUNCTIONAL */
+        .nfr-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .nfr-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.4rem;
+            transition: transform 0.2s;
+        }
+        .nfr-card:hover { transform: translateY(-3px); }
+
+        .nfr-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent3);
+            margin-bottom: 0.6rem;
+        }
+        .nfr-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        .nfr-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.7; }
+
+        /* USE CASE FLOW */
+        .usecase-flow {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .flow-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .flow-steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .flow-step {
+            background: rgba(0,119,255,0.08);
+            border: 1px solid rgba(0,119,255,0.2);
+            border-radius: 4px;
+            padding: 0.6rem 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: #4da6ff;
+            white-space: nowrap;
+        }
+
+        .flow-arrow {
+            color: var(--muted);
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        /* SUMMARY */
+        .summary-box {
+            background: rgba(0,119,255,0.04);
+            border: 1px solid rgba(0,119,255,0.15);
+            border-radius: 8px;
+            padding: 2rem 2.5rem;
+            margin: 3rem 0;
+        }
+        .summary-box-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent2);
+            margin-bottom: 0.8rem;
+        }
+        .summary-box p { font-size: 0.95rem; color: var(--muted); line-height: 1.8; }
+        .summary-box strong { color: var(--text); font-weight: 500; }
+
+        .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 3rem;
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        .nav-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            transition: color 0.2s;
+        }
+        .nav-btn:hover { color: var(--accent); }
+        .nav-btn.next { flex-direction: row-reverse; }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            border-top: 1px solid var(--border);
+            padding: 2rem 4rem;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+        footer span { color: var(--accent); }
+
+        @media (max-width: 700px) {
+            nav { padding: 1rem 1.5rem; }
+            .stakeholder-grid, .nfr-grid { grid-template-columns: 1fr; }
+            .flow-steps { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
 </head>
 <body>
-    <header class="container">
-        <hgroup>
-            <h1>2. Hafta: Paydaş Analizi ve Gereksinim Belirleme</h1>
-            <p>Market Otomasyonu Projesi İlerleme Raporu</p>
-        </hgroup>
-        <nav>
-            <ul>
-                <li><a href="../index.html" class="contrast">Anasayfaya Dön</a></li>
-            </ul>
-        </nav>
-    </header>
 
-    <main class="container">
-        <article>
-            <h2>Paydaş Analizi</h2>
-            <p>Sistemin temel paydaşları ve rolleri aşağıdaki gibidir:</p>
-            <ul>
-                <li><strong>Market Sahibi (Birincil Aktör):</strong> Satış işlemleri, stok güncellemeleri ve veresiye takibi işlemlerini yöneten ana kullanıcıdır.</li>
-                <li><strong>Müşteriler:</strong> Satış işleminin doğrudan etkilediği, veresiye borçlarına sahip olabilecek son kullanıcılardır.</li>
-                <li><strong>Geliştirici (Emir BAYRAKTAR):</strong> Sistemin tasarımı, kodlanması ve bakımından sorumludur.</li>
-            </ul>
-            
-            <h3>Fonksiyonel Gereksinimler</h3>
-            <p>Sistemin gerçekleştirmesi gereken temel işlevler:</p>
-            <ul>
-                <li><strong>FR-01:</strong> Barkod okuma sistemi ile hızlı satış yapılabilmelidir.</li>
-                <li><strong>FR-02:</strong> Veresiye borçları müşteri bazlı olarak kaydedilebilmeli ve takip edilebilmelidir.</li>
-                <li><strong>FR-03:</strong> Kritik stok seviyesine düşen ürünler için otomatik görsel uyarı verilmelidir.</li>
-                <li><strong>FR-04:</strong> Günlük kâr-zarar analizi ve satış raporları üretilebilmelidir.</li>
-            </ul>
+<div class="grid-bg"></div>
 
-            <h3>Fonksiyonel Olmayan Gereksinimler</h3>
-            <ul>
-                <li><strong>Performans:</strong> Sayfa geçiş süreleri 1 saniyenin altında olmalıdır.</li>
-                <li><strong>Kullanılabilirlik:</strong> Düşük bilgisayar okuryazarlığına sahip kullanıcılar için karmaşıklıktan uzak bir arayüz.</li>
-                <li><strong>Güvenilirlik:</strong> Veritabanı (MySQL) yedekleme ve veri bütünlüğü.</li>
-            </ul>
+<nav>
+    <div class="nav-logo">MO_SYS // HAFTA 02</div>
+    <a href="../index.html" class="back-link">Anasayfaya Dön</a>
+</nav>
 
-            <h3>Temel İş Akışı (Use Case)</h3>
-            <p>
-                <strong>Satış Süreci:</strong> Kasiyer giriş yapar -> Barkod okutulur -> Toplam tutar hesaplanır -> Ödeme tipi seçilir (Nakit/Veresiye) -> Stok güncellenir -> Fiş oluşturulur.
-            </p>
-        </article>
-    </main>
+<div class="page-wrap">
 
-    <footer class="container">
-        <small>&copy; 2026 Emir BAYRAKTAR | Sistem Analizi ve Tasarımı Dersi</small>
-    </footer>
+    <div class="report-header">
+        <div class="report-week-tag">Hafta 02 — Proje İlerleme Raporu</div>
+        <h1 class="report-title">Paydaş Analizi ve<br>Gereksinim Belirleme</h1>
+        <div class="report-meta">
+            <div class="meta-dot"></div>
+            <span>2026 · 2. Hafta</span>
+            <span>·</span>
+            <span>Emir BAYRAKTAR</span>
+            <span>·</span>
+            <span>Market Otomasyonu</span>
+        </div>
+        <div class="tags-row">
+            <span class="tag tag-green">Paydaş Analizi</span>
+            <span class="tag tag-blue">Fonksiyonel Gereksinim</span>
+            <span class="tag tag-orange">Use Case</span>
+        </div>
+    </div>
+
+    <!-- PAYDAŞ ANALİZİ -->
+    <div class="section-block">
+        <div class="block-label">Paydaş Analizi</div>
+        <div class="block-title">Sistemin Temel Paydaşları</div>
+        <p class="block-text">Sistemin başarıyla hayata geçirilebilmesi için etkilenen tüm taraflar tanımlandı ve rolleri belirlendi.</p>
+
+        <div class="stakeholder-grid">
+            <div class="stakeholder-card">
+                <div class="sk-icon">🏪</div>
+                <div class="sk-role">BİRİNCİL AKTÖR</div>
+                <div class="sk-name">Market Sahibi</div>
+                <div class="sk-desc">Satış işlemleri, stok güncellemeleri ve veresiye takibi işlemlerini yöneten ana kullanıcı.</div>
+            </div>
+            <div class="stakeholder-card">
+                <div class="sk-icon">👥</div>
+                <div class="sk-role">SON KULLANICI</div>
+                <div class="sk-name">Müşteriler</div>
+                <div class="sk-desc">Satış işleminin doğrudan etkilediği, veresiye borçlarına sahip olabilecek bireyler.</div>
+            </div>
+            <div class="stakeholder-card">
+                <div class="sk-icon">💻</div>
+                <div class="sk-role">GELİŞTİRİCİ</div>
+                <div class="sk-name">Emir BAYRAKTAR</div>
+                <div class="sk-desc">Sistemin tasarımı, kodlanması ve bakımından sorumlu yazılım geliştirici.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FONKSİYONEL GEREKSİNİMLER -->
+    <div class="section-block">
+        <div class="block-label">Fonksiyonel Gereksinimler</div>
+        <div class="block-title">Sistemin Yapması Gerekenler</div>
+        <p class="block-text">Sistemin gerçekleştirmesi zorunlu olan temel işlevler aşağıda listelenmiştir.</p>
+
+        <div class="req-list">
+            <div class="req-item">
+                <div class="req-code">FR-01</div>
+                <div class="req-text">
+                    <strong>Hızlı Satış (Barkod)</strong>
+                    Barkod okuma sistemi ile hızlı satış yapılabilmeli; her ürün 1 saniyenin altında işleme alınabilmelidir.
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-code">FR-02</div>
+                <div class="req-text">
+                    <strong>Veresiye Yönetimi</strong>
+                    Veresiye borçları müşteri bazlı olarak kaydedilebilmeli, görüntülenebilmeli ve tahsilat işlemi yapılabilmelidir.
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-code">FR-03</div>
+                <div class="req-text">
+                    <strong>Kritik Stok Uyarısı</strong>
+                    Stok seviyesi belirlenen eşiğin altına düşen ürünler için otomatik görsel uyarı verilmelidir.
+                </div>
+            </div>
+            <div class="req-item">
+                <div class="req-code">FR-04</div>
+                <div class="req-text">
+                    <strong>Satış Raporları</strong>
+                    Günlük kâr-zarar analizi ve satış raporları sistem tarafından otomatik üretilebilmelidir.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FONKSİYONEL OLMAYAN -->
+    <div class="section-block">
+        <div class="block-label">Fonksiyonel Olmayan Gereksinimler</div>
+        <div class="block-title">Sistem Kalite Kriterleri</div>
+
+        <div class="nfr-grid">
+            <div class="nfr-card">
+                <div class="nfr-label">Performans</div>
+                <div class="nfr-title">Hız</div>
+                <div class="nfr-desc">Sayfa geçiş süreleri 1 saniyenin altında olmalı; satış işlemi kesintisiz akmalıdır.</div>
+            </div>
+            <div class="nfr-card">
+                <div class="nfr-label">Kullanılabilirlik</div>
+                <div class="nfr-title">Sade Arayüz</div>
+                <div class="nfr-desc">Düşük bilgisayar okuryazarlığına sahip kullanıcılar için karmaşıklıktan uzak bir arayüz.</div>
+            </div>
+            <div class="nfr-card">
+                <div class="nfr-label">Güvenilirlik</div>
+                <div class="nfr-title">Veri Bütünlüğü</div>
+                <div class="nfr-desc">MySQL yedekleme ve veri bütünlüğü korumasıyla kayıt kaybı riski sıfıra indirilir.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- USE CASE -->
+    <div class="section-block">
+        <div class="block-label">Temel İş Akışı</div>
+        <div class="block-title">Satış Süreci Use Case</div>
+
+        <div class="usecase-flow">
+            <div class="flow-title">→ Satış İşlem Akışı</div>
+            <div class="flow-steps">
+                <div class="flow-step">Kasiyer Giriş</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Barkod Okutulur</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Tutar Hesaplanır</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Ödeme Tipi Seçilir</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Stok Güncellenir</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Fiş Oluşturulur</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-box">
+        <div class="summary-box-label">// Hafta Özeti</div>
+        <p>Bu hafta sistemin tüm paydaşları tanımlandı, <strong>4 fonksiyonel</strong> ve <strong>3 fonksiyonel olmayan gereksinim</strong> belgelendi. Satış sürecinin temel Use Case akışı çizildi. Gelecek hafta sistem mimarisi ve veritabanı tasarımı çalışmalarına geçilecek.</p>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="week-1.html" class="nav-btn">← Hafta 1</a>
+        <a href="../index.html" class="nav-btn next">Anasayfa →</a>
+    </div>
+
+</div>
+
+<footer>
+    <span>Emir BAYRAKTAR</span> · Sistem Analizi ve Tasarımı Dersi · 2026
+</footer>
+
 </body>
 </html>

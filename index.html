@@ -1,68 +1,866 @@
 <!DOCTYPE html>
-<html lang="tr" data-theme="light">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Market Otomasyonu - Proje İlerleme Bloğu</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <title>Market Otomasyonu — Emir BAYRAKTAR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0c10;
+            --surface: #111318;
+            --surface2: #181c23;
+            --border: #1e2430;
+            --accent: #00e5a0;
+            --accent2: #0077ff;
+            --accent3: #ff6b35;
+            --text: #e8eaf0;
+            --muted: #6b7280;
+            --card-bg: #13161e;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ── NOISE OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        /* ── GRID BG ── */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── GLOW ORBS ── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb-1 { width: 600px; height: 600px; background: rgba(0,119,255,0.07); top: -200px; right: -200px; animation: drift 20s ease-in-out infinite; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(0,229,160,0.06); bottom: 100px; left: -100px; animation: drift 25s ease-in-out infinite reverse; }
+        @keyframes drift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(40px, 40px); } }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 1.2rem 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(10,12,16,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+        }
+
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a {
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text); }
+
+        .nav-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.3rem 0.8rem;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            z-index: 1;
+            padding: 0 4rem;
+        }
+
+        .hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        .hero-tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.2s;
+        }
+        .hero-tag::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        .hero-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(3.5rem, 8vw, 7rem);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.4s;
+        }
+
+        .hero-title .line-accent { color: var(--accent); display: block; }
+        .hero-title .line-dim { color: var(--muted); font-weight: 400; font-size: 0.6em; display: block; margin-top: 0.3em; }
+
+        .hero-desc {
+            max-width: 580px;
+            font-size: 1.05rem;
+            color: var(--muted);
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.6s;
+            line-height: 1.8;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.8s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.9rem 2.2rem;
+            border-radius: 3px;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover { background: #00ffb3; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,229,160,0.3); }
+
+        .btn-outline {
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.9rem 2.2rem;
+            border-radius: 3px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-outline:hover { border-color: var(--muted); color: var(--text); }
+
+        /* STATS ROW */
+        .hero-stats {
+            position: absolute;
+            bottom: 3rem;
+            right: 4rem;
+            display: flex;
+            gap: 3rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 1s;
+        }
+        .stat { text-align: right; }
+        .stat-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+        }
+        .stat-num span { color: var(--accent); font-size: 1.5rem; }
+        .stat-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: 0.3rem;
+        }
+
+        /* SCROLL INDICATOR */
+        .scroll-hint {
+            position: absolute;
+            bottom: 3rem;
+            left: 4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--muted);
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 1.2s;
+        }
+        .scroll-line {
+            width: 40px;
+            height: 1px;
+            background: var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .scroll-line::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: var(--accent);
+            animation: scanline 2s ease-in-out infinite;
+        }
+        @keyframes scanline { 0% { left: -100%; } 100% { left: 100%; } }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── ABOUT ── */
+        section { position: relative; z-index: 1; }
+
+        .section-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 4rem;
+        }
+
+        .section-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            max-width: 60px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            margin-bottom: 3rem;
+        }
+
+        /* ABOUT GRID */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .about-text { color: var(--muted); font-size: 1rem; line-height: 1.9; }
+        .about-text strong { color: var(--text); font-weight: 500; }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .tech-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.4rem;
+            transition: border-color 0.3s, transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .tech-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent2), var(--accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s;
+        }
+        .tech-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .tech-card:hover::before { transform: scaleX(1); }
+
+        .tech-icon {
+            font-size: 1.6rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .tech-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .tech-desc {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
+        }
+
+        /* PROBLEMS */
+        .problems-section {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .problem-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .problem-card:hover { transform: translateY(-5px); border-color: var(--accent3); }
+
+        .problem-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--accent3);
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+
+        .problem-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .problem-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.8; }
+
+        .problem-icon {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 1.5rem;
+            opacity: 0.4;
+        }
+
+        /* FEATURES */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            transition: transform 0.3s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s;
+        }
+        .feature-card:hover { transform: translateY(-5px); border-color: rgba(0,229,160,0.3); }
+        .feature-card:hover::after { transform: scaleX(1); }
+
+        .feature-icon { font-size: 2rem; margin-bottom: 1.2rem; }
+
+        .feature-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+        }
+
+        .feature-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.8; }
+
+        /* ── REPORTS ── */
+        #reports { padding-top: 2rem; }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .report-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: block;
+            position: relative;
+        }
+        .report-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+
+        .report-card-top {
+            padding: 2rem 2rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        .report-week {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .report-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .report-status {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0,229,160,0.2);
+        }
+
+        .report-status.pending {
+            background: var(--border);
+            box-shadow: none;
+        }
+
+        .report-card-body { padding: 1.5rem 2rem; }
+
+        .report-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 2px;
+            letter-spacing: 0.05em;
+        }
+        .tag-green { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+        .tag-blue { background: rgba(0,119,255,0.1); color: #4da6ff; border: 1px solid rgba(0,119,255,0.2); }
+        .tag-orange { background: rgba(255,107,53,0.1); color: var(--accent3); border: 1px solid rgba(255,107,53,0.2); }
+        .tag-dim { background: rgba(255,255,255,0.03); color: var(--muted); border: 1px solid var(--border); }
+
+        .report-card-footer {
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--border);
+        }
+
+        .report-date {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+        }
+
+        .report-arrow {
+            font-size: 1rem;
+            color: var(--accent);
+            transition: transform 0.2s;
+        }
+        .report-card:hover .report-arrow { transform: translateX(5px); }
+
+        /* PENDING CARD */
+        .report-card.pending-card {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            position: relative;
+            z-index: 1;
+            border-top: 1px solid var(--border);
+            padding: 3rem 4rem;
+        }
+
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-name {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        .footer-name span { color: var(--accent); }
+
+        .footer-course {
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .footer-year {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        /* DIVIDER */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            nav { padding: 1rem 1.5rem; }
+            .hero { padding: 0 1.5rem; }
+            .section-wrap { padding: 4rem 1.5rem; }
+            .hero-title { font-size: 3rem; }
+            .about-grid { grid-template-columns: 1fr; }
+            .problems-grid, .features-grid { grid-template-columns: 1fr; }
+            .hero-stats { right: 1.5rem; bottom: 6rem; }
+            footer { padding: 2rem 1.5rem; }
+            .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+        }
+    </style>
 </head>
 <body>
-    <header class="container">
-        <hgroup>
-            <h1>Market Otomasyonu</h1>
-            <p>Sistem Analizi ve Tasarımı Dersi - Proje İlerleme Bloğu</p>
-        </hgroup>
-        <nav>
-            <ul>
-                <li><strong>Emir BAYRAKTAR</strong></li>
-            </ul>
-            <ul>
-                <li><a href="index.html">Anasayfa</a></li>
-                <li><a href="#reports" class="secondary">Raporlar</a></li>
-            </ul>
-        </nav>
-    </header>
 
-    <main class="container">
-        <section id="about">
-            <article>
-                <h3>Proje Hakkında</h3>
-                <p>
-                    Bu proje, yerel marketlerin ve bakkalların günlük operasyonlarını (satış, stok takibi, veresiye yönetimi) dijitalleştirmeyi amaçlayan bir masaüstü otomasyon yazılımıdır.
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- NAV -->
+<nav>
+    <div class="nav-logo">MO_SYS // 2026</div>
+    <ul class="nav-links">
+        <li><a href="#about">Proje</a></li>
+        <li><a href="#sorunlar">Sorunlar</a></li>
+        <li><a href="#ozellikler">Özellikler</a></li>
+        <li><a href="#reports">Raporlar</a></li>
+    </ul>
+    <div class="nav-badge">Emir BAYRAKTAR</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-tag">Sistem Analizi ve Tasarımı · 2026</div>
+        <h1 class="hero-title">
+            Market
+            <span class="line-accent">Otomasyonu</span>
+            <span class="line-dim">Proje İlerleme Bloğu</span>
+        </h1>
+        <p class="hero-desc">
+            Küçük ve orta ölçekli marketlerin satış, stok takibi ve veresiye yönetimini dijitalleştiren C# WinForms tabanlı masaüstü otomasyon sistemi.
+        </p>
+        <div class="hero-actions">
+            <a href="#reports" class="btn-primary">Raporları İncele</a>
+            <a href="#about" class="btn-outline">Proje Detayları</a>
+        </div>
+    </div>
+
+    <div class="hero-stats">
+        <div class="stat">
+            <div class="stat-num">2<span>/14</span></div>
+            <div class="stat-label">Hafta Tamamlandı</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">4<span>+</span></div>
+            <div class="stat-label">Fonksiyonel Gereksinim</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Paydaş</div>
+        </div>
+    </div>
+
+    <div class="scroll-hint">
+        <div class="scroll-line"></div>
+        Aşağı Kaydır
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+    <div class="section-wrap">
+        <div class="section-label">Proje Hakkında</div>
+        <h2 class="section-title">Sistem Nedir?</h2>
+
+        <div class="about-grid">
+            <div>
+                <p class="about-text">
+                    <strong>Market Otomasyonu</strong>, yerel market ve bakkalların günlük operasyonlarını — satış işlemleri, stok takibi, veresiye yönetimi — kağıt defterden dijital ortama taşıyan bir masaüstü yazılımıdır.<br><br>
+                    Geleneksel yöntemlerin yarattığı finansal hatalar, stok kayıpları ve zaman kaybının önüne geçmek için tasarlanmış bu sistem; <strong>barkod okuyucu entegrasyonu</strong>, <strong>anlık stok uyarıları</strong> ve <strong>müşteri bazlı veresiye takibi</strong> sunar.<br><br>
+                    Proje, <strong>C# WinForms</strong> teknolojisi ve <strong>MySQL</strong> veritabanı üzerine inşa edilmektedir.
                 </p>
-                <ul>
-                    <li><strong>Teknoloji:</strong> C# WinForms</li>
-                    <li><strong>Veritabanı:</strong> MySQL</li>
-                    <li><strong>Hedef:</strong> Manuel defter kayıtlarının yerini alan, hızlı ve hatasız bir sistem.</li>
-                </ul>
-            </article>
-        </section>
-
-        <section id="reports">
-            <h2>Haftalık İlerleme Raporları</h2>
-            <div class="grid">
-                <article>
-                    <header>1. Hafta</header>
-                    <p>Proje Teklifi ve Problem Tanımı</p>
-                    <footer><a href="reports/week-1.html" class="outline">Detayları Gör</a></footer>
-                </article>
-                <article>
-                    <header>2. Hafta</header>
-                    <p>Paydaş Analizi ve Gereksinim Belirleme</p>
-                    <footer><a href="reports/week-2.html" class="outline">Detayları Gör</a></footer>
-                </article>
-                <article style="opacity: 0.5;">
-                    <header>3. Hafta</header>
-                    <p>Yakında...</p>
-                    <footer><button disabled class="outline">Bekleniyor</button></footer>
-                </article>
             </div>
-        </section>
-    </main>
 
-    <footer class="container">
-        <small>&copy; 2026 Emir BAYRAKTAR | Sistem Analizi ve Tasarımı Dersi</small>
-    </footer>
+            <div class="tech-stack">
+                <div class="tech-card">
+                    <div class="tech-icon">⚙️</div>
+                    <div class="tech-name">C# WinForms</div>
+                    <div class="tech-desc">Masaüstü uygulama katmanı</div>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🗄️</div>
+                    <div class="tech-name">MySQL</div>
+                    <div class="tech-desc">Veritabanı yönetim sistemi</div>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">📦</div>
+                    <div class="tech-name">Barkod API</div>
+                    <div class="tech-desc">Hızlı ürün tanıma</div>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">🔐</div>
+                    <div class="tech-name">.NET Framework</div>
+                    <div class="tech-desc">Uygulama altyapısı</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROBLEMS -->
+<section id="sorunlar" class="problems-section">
+    <div class="section-wrap">
+        <div class="section-label">Problem Tanımı</div>
+        <h2 class="section-title">Çözülmesi Gereken<br>Sorunlar</h2>
+
+        <div class="problems-grid">
+            <div class="problem-card">
+                <div class="problem-icon">📋</div>
+                <div class="problem-num">SORUN // 01</div>
+                <div class="problem-title">Manuel Stok Takibi</div>
+                <p class="problem-desc">Ürünlerin manuel sayımı hem hataya açıktır hem de son kullanma tarihi geçen ürünlerin fark edilmemesine yol açmaktadır.</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">📒</div>
+                <div class="problem-num">SORUN // 02</div>
+                <div class="problem-title">Kağıt Veresiye Defteri</div>
+                <p class="problem-desc">Defter sayfalarında tutulan borç kayıtları veri kaybına açık; borç toplamı hesaplanırken hatalar yapılmaktadır.</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">⏱️</div>
+                <div class="problem-num">SORUN // 03</div>
+                <div class="problem-title">Operasyonel Verimsizlik</div>
+                <p class="problem-desc">Manuel kayıt tutma ve fiziksel sayım işlemleri günlük operasyonlarda ciddi zaman kaybına neden olmaktadır.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section id="ozellikler">
+    <div class="section-wrap">
+        <div class="section-label">Temel Özellikler</div>
+        <h2 class="section-title">Sistemin Sunduğu<br>Çözümler</h2>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">Hızlı Satış İşlemi</div>
+                <p class="feature-desc">Barkod okuyucu entegrasyonu sayesinde her ürün 1 saniyeden kısa sürede satışa eklenir. Kasiyer girişi ve fiş üretimi otomatiktir.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👤</div>
+                <div class="feature-title">Dijital Veresiye Defteri</div>
+                <p class="feature-desc">Müşteri bazlı borç takibi, toplam borç hesaplama ve hızlı tahsilat işlemleri tek panelde yönetilir.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔔</div>
+                <div class="feature-title">Kritik Stok Uyarısı</div>
+                <p class="feature-desc">Stok seviyesi belirlenen eşiğin altına düştüğünde anlık görsel uyarı verilir. Ürün tükenmesi önceden fark edilir.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Satış Raporları</div>
+                <p class="feature-desc">Günlük kâr-zarar analizi ve satış raporları otomatik üretilir. İşletme performansı anlık izlenebilir.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-title">Veri Güvenliği</div>
+                <p class="feature-desc">MySQL veritabanı yedekleme ve veri bütünlüğü korumasıyla kayıt kaybı riski ortadan kalkar.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🖥️</div>
+                <div class="feature-title">Kolay Arayüz</div>
+                <p class="feature-desc">Düşük bilgisayar okuryazarlığına sahip kullanıcılar için tasarlanmış sade ve hızlı WinForms arayüzü.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- REPORTS -->
+<section id="reports">
+    <div class="section-wrap">
+        <div class="section-label">Haftalık Raporlar</div>
+        <h2 class="section-title">İlerleme<br>Günlüğü</h2>
+
+        <div class="reports-grid">
+
+            <!-- Week 1 -->
+            <a href="reports/week-1.html" class="report-card">
+                <div class="report-card-top">
+                    <div class="report-week">// Hafta 01</div>
+                    <div class="report-title">Proje Teklifi ve<br>Problem Tanımı</div>
+                    <div class="report-status"></div>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-tags">
+                        <span class="tag tag-green">Problem Analizi</span>
+                        <span class="tag tag-blue">Proje Teklifi</span>
+                        <span class="tag tag-orange">Hedef Tanımlama</span>
+                    </div>
+                </div>
+                <div class="report-card-footer">
+                    <div class="report-date">2026 — Hafta 1</div>
+                    <div class="report-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Week 2 -->
+            <a href="reports/week-2.html" class="report-card">
+                <div class="report-card-top">
+                    <div class="report-week">// Hafta 02</div>
+                    <div class="report-title">Paydaş Analizi ve<br>Gereksinim Belirleme</div>
+                    <div class="report-status"></div>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-tags">
+                        <span class="tag tag-green">Paydaş Analizi</span>
+                        <span class="tag tag-blue">Fonksiyonel Gereksinim</span>
+                        <span class="tag tag-orange">Use Case</span>
+                    </div>
+                </div>
+                <div class="report-card-footer">
+                    <div class="report-date">2026 — Hafta 2</div>
+                    <div class="report-arrow">→</div>
+                </div>
+            </a>
+
+            <!-- Week 3+ pending -->
+            <div class="report-card pending-card">
+                <div class="report-card-top">
+                    <div class="report-week">// Hafta 03</div>
+                    <div class="report-title">Yakında...</div>
+                    <div class="report-status pending"></div>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-tags">
+                        <span class="tag tag-dim">Bekleniyor</span>
+                    </div>
+                </div>
+                <div class="report-card-footer">
+                    <div class="report-date">— Hafta 3</div>
+                    <div class="report-arrow" style="opacity:0.3">→</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-name">EMİR <span>BAYRAKTAR</span></div>
+        <div class="footer-course">Sistem Analizi ve Tasarımı Dersi · 2026</div>
+        <div class="footer-year">MO_SYS © 2026</div>
+    </div>
+</footer>
+
 </body>
 </html>
